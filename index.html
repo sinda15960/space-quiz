@@ -346,12 +346,22 @@
     const answersContainer = document.querySelector("#answers");
     const feedback = document.querySelector("#feedback");
     const nextButton = document.querySelector("#next");
+    let runQuestions = shuffleQuestions(questions);
     let current = 0;
     let score = 0;
     let answered = false;
 
+    function shuffleQuestions(questionList) {
+      const shuffledQuestions = [...questionList];
+      for (let index = shuffledQuestions.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffledQuestions[index], shuffledQuestions[randomIndex]] = [shuffledQuestions[randomIndex], shuffledQuestions[index]];
+      }
+      return shuffledQuestions;
+    }
+
     function renderQuestion() {
-      const item = questions[current];
+      const item = runQuestions[current];
       answered = false;
       questionCount.textContent = `Question ${current + 1} of ${questions.length}`;
       progress.style.width = `${(current / questions.length) * 100}%`;
@@ -378,7 +388,7 @@
     function chooseAnswer(index, selectedButton) {
       if (answered) return;
       answered = true;
-      const correct = index === questions[current].correct;
+      const correct = index === runQuestions[current].correct;
       const buttons = [...answersContainer.querySelectorAll("button")];
       buttons.forEach(button => { button.disabled = true; });
 
@@ -390,8 +400,8 @@
         feedback.classList.add("good");
       } else {
         selectedButton.classList.add("wrong");
-        buttons[questions[current].correct].classList.add("correct");
-        feedback.textContent = `Not quite — the answer is ${questions[current].answers[questions[current].correct]}.`;
+        buttons[runQuestions[current].correct].classList.add("correct");
+        feedback.textContent = `Not quite — the answer is ${runQuestions[current].answers[runQuestions[current].correct]}.`;
         feedback.classList.add("bad");
       }
 
@@ -432,6 +442,7 @@
     });
 
     document.querySelector("#restart").addEventListener("click", () => {
+      runQuestions = shuffleQuestions(questions);
       current = 0;
       score = 0;
       result.hidden = true;
